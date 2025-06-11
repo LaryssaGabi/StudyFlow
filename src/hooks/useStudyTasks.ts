@@ -103,4 +103,5 @@ export function useStudyTasks(dayOfWeek?: DayOfWeek) {
     toggleTaskCompletion,
     refetch: fetchTasks
   };
+  
 }
