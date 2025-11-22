@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { TrendingUp, Book, Clock, Target, Calendar, Brain } from 'lucide-react';
 import { StudyTask, FlashCard } from '../types';
 

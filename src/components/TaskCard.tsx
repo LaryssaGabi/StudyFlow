@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { CheckCircle2, Circle, Clock, Edit3, Trash2, BookOpen } from 'lucide-react';
 import { StudyTask } from '../types';
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { RotateCcw, Edit3, Trash2, Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react';
 import { FlashCard } from '../types';
 

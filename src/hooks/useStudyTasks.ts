@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { firestoreHelpers } from '../lib/firebase';
 import { StudyTask, DayOfWeek } from '../types';
 import toast from 'react-hot-toast';
 
@@ -10,19 +10,8 @@ export function useStudyTasks(dayOfWeek?: DayOfWeek) {
   const fetchTasks = async () => {
     try {
       setLoading(true);
-      let query = supabase
-        .from('study_tasks')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (dayOfWeek !== undefined) {
-        query = query.eq('day_of_week', dayOfWeek);
-      }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-      setTasks(data || []);
+      const data = await firestoreHelpers.getStudyTasks(dayOfWeek);
+      setTasks(data as StudyTask[]);
     } catch (error) {
       console.error('Error fetching tasks:', error);
       toast.error('Erro ao carregar tarefas');
@@ -33,14 +22,8 @@ export function useStudyTasks(dayOfWeek?: DayOfWeek) {
 
   const addTask = async (task: Omit<StudyTask, 'id' | 'created_at' | 'updated_at'>) => {
     try {
-      const { data, error } = await supabase
-        .from('study_tasks')
-        .insert([task])
-        .select()
-        .single();
-
-      if (error) throw error;
-      setTasks(prev => [data, ...prev]);
+      const data = await firestoreHelpers.addStudyTask(task);
+      setTasks(prev => [data as StudyTask, ...prev]);
       toast.success('Tarefa adicionada com sucesso!');
       return data;
     } catch (error) {
@@ -52,16 +35,11 @@ export function useStudyTasks(dayOfWeek?: DayOfWeek) {
 
   const updateTask = async (id: string, updates: Partial<StudyTask>) => {
     try {
-      const { data, error } = await supabase
-        .from('study_tasks')
-        .update({ ...updates, updated_at: new Date().toISOString() })
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      setTasks(prev => prev.map(task => task.id === id ? data : task));
-      return data;
+      await firestoreHelpers.updateStudyTask(id, updates);
+      setTasks(prev => prev.map(task => 
+        task.id === id ? { ...task, ...updates, updated_at: new Date().toISOString() } : task
+      ));
+      return { id, ...updates };
     } catch (error) {
       console.error('Error updating task:', error);
       toast.error('Erro ao atualizar tarefa');
@@ -71,12 +49,7 @@ export function useStudyTasks(dayOfWeek?: DayOfWeek) {
 
   const deleteTask = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('study_tasks')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
+      await firestoreHelpers.deleteStudyTask(id);
       setTasks(prev => prev.filter(task => task.id !== id));
       toast.success('Tarefa removida com sucesso!');
     } catch (error) {
@@ -103,5 +76,4 @@ export function useStudyTasks(dayOfWeek?: DayOfWeek) {
     toggleTaskCompletion,
     refetch: fetchTasks
   };
-  
 }

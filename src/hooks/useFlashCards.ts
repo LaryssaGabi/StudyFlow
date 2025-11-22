@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { firestoreHelpers } from '../lib/firebase';
 import { FlashCard } from '../types';
 import toast from 'react-hot-toast';
 
@@ -10,13 +10,8 @@ export function useFlashCards() {
   const fetchCards = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('flash_cards')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setCards(data || []);
+      const data = await firestoreHelpers.getFlashCards();
+      setCards(data as FlashCard[]);
     } catch (error) {
       console.error('Error fetching flash cards:', error);
       toast.error('Erro ao carregar flash cards');
@@ -25,16 +20,10 @@ export function useFlashCards() {
     }
   };
 
-  const addCard = async (card: Omit<FlashCard, 'id' | 'created_at' | 'updated_at' | 'review_count' | 'mastered'>) => {
+  const addCard = async (card: Omit<FlashCard, 'id' | 'created_at' | 'updated_at' | 'review_count' | 'mastered' | 'last_reviewed'>) => {
     try {
-      const { data, error } = await supabase
-        .from('flash_cards')
-        .insert([{ ...card, review_count: 0, mastered: false }])
-        .select()
-        .single();
-
-      if (error) throw error;
-      setCards(prev => [data, ...prev]);
+      const data = await firestoreHelpers.addFlashCard(card);
+      setCards(prev => [data as FlashCard, ...prev]);
       toast.success('Flash card adicionado com sucesso!');
       return data;
     } catch (error) {
@@ -46,16 +35,11 @@ export function useFlashCards() {
 
   const updateCard = async (id: string, updates: Partial<FlashCard>) => {
     try {
-      const { data, error } = await supabase
-        .from('flash_cards')
-        .update({ ...updates, updated_at: new Date().toISOString() })
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      setCards(prev => prev.map(card => card.id === id ? data : card));
-      return data;
+      await firestoreHelpers.updateFlashCard(id, updates);
+      setCards(prev => prev.map(card => 
+        card.id === id ? { ...card, ...updates, updated_at: new Date().toISOString() } : card
+      ));
+      return { id, ...updates };
     } catch (error) {
       console.error('Error updating flash card:', error);
       toast.error('Erro ao atualizar flash card');
@@ -65,12 +49,7 @@ export function useFlashCards() {
 
   const deleteCard = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('flash_cards')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
+      await firestoreHelpers.deleteFlashCard(id);
       setCards(prev => prev.filter(card => card.id !== id));
       toast.success('Flash card removido com sucesso!');
     } catch (error) {

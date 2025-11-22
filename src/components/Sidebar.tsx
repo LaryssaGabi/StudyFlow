@@ -1,12 +1,11 @@
-import React from 'react';
-import { Calendar, Brain, BarChart3 } from 'lucide-react';
+import { Calendar, Brain, BarChart3, FileText } from 'lucide-react';
 import { DayOfWeek } from '../types';
 
 interface SidebarProps {
   selectedDay: DayOfWeek;
   onDaySelect: (day: DayOfWeek) => void;
-  currentView: 'tasks' | 'flashcards' | 'stats';
-  onViewChange: (view: 'tasks' | 'flashcards' | 'stats') => void;
+  currentView: 'tasks' | 'flashcards' | 'stats' | 'themes';
+  onViewChange: (view: 'tasks' | 'flashcards' | 'stats' | 'themes') => void;
 }
 
 const DAYS = [
@@ -67,6 +66,17 @@ export function Sidebar({ selectedDay, onDaySelect, currentView, onViewChange }:
             >
               <BarChart3 className="w-4 h-4 mr-3" />
               Estatísticas
+            </button>
+            <button
+              onClick={() => onViewChange('themes')}
+              className={`w-full flex items-centthemeser px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                currentView === 'themes'
+                  ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
+                  : 'text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              <FileText className="w-4 h-4 mr-3" />
+              Temas de redação
             </button>
           </div>
         </div>
