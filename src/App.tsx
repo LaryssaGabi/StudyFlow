@@ -87,19 +87,7 @@ function App() {
       );
     }
 
-    if (currentView === 'themes') {
-      return (
-        <div>
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Temas de Redação</h1>
-            <p className="text-gray-600 mt-2">Pratique seus temas de redação</p>
-          </div>
-          <div className="text-center py-12">
-            <p className="text-gray-500">Em breve...</p>
-          </div>
-        </div>
-      );
-    }
+
 
     return (
       <div>
